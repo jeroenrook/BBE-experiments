@@ -1,0 +1,10 @@
+#parameters
+# JAKOB: not sure about the parameter ranges; specified upper bounds by rule of thumb
+mu integer [10, 1000] [100] # the size of the Pareto approximation set
+step_size real [0.0000000001, 1] [0.001] # step size
+sampling categorical {uniform, LHS, Grid} [uniform] # the method used in the initial sampling of the approximation set
+dominated_steer categorical {M1, M2, M3, M4, M5, M6, NDS} [NDS] # the method to steer (move) the dominated points
+
+#Conditional clauses
+
+#Forbidden clauses

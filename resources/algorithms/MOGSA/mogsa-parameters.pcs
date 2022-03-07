@@ -1,0 +1,14 @@
+#parameters
+
+max_no_basins integer [1, 2000] [50] #Maximum number of basins allowed to visit on the way to the optimum
+max_no_steps_ls integer [1, 1000] [500] # Maximum number of steps performed to find a locally efficient point
+scale_step real [0, 1] [0.5] # Scaling factor for the step size in the direction of the multi-objective gradient. The default is 0.5.
+exploration_step real [0, 1] [0.2] # Scaling factor for the step size, when exploring a local efficient set. The default is 0.2.
+prec_grad real [0, 0.01] [1e-6] # Precision value (= step size) used for approximating the gradient. The default is 1e-6.
+prec_norm real [0, 0.01] [1e-6] # Precision threshold when normalizing a vector. That is, every element of the vector, whose absolute value is below this threshold, will be replaced by 0. The default is 1e-6.
+prec_angle real [0, 0.01] [1e-4] # Precision threshold used for comparing whether the angle (in degree) between two vectors is zero. The default is 1e-4.
+ls_method categorical {bisection, mo-ls, both} [both] # local search method
+
+#Conditional clauses
+
+#Forbidden clauses

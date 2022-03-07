@@ -1,0 +1,73 @@
+#parameters
+decomp categorical {SLD, Uniform} [SLD]
+neighbor categorical {lambda,x} [lambda]
+T integer [10,40] [20]
+deltap real [0.1,1] [1]
+aggfunction categorical {wt,awt,pbi} [wt]
+theta real [2,20] [10]
+theta | aggfunction in {pbi}
+update categorical {standard,best,restricted} [standard]
+archive categorical {0,1} [0]
+nr integer [1,10] [1]
+nr | update in {best, restricted}
+Tr integer [4,20] [8]
+Tr | update in {best}
+
+varop1 categorical {binrec,diffmut,polymut,sbx} [sbx]
+varop2 categorical {binrec,diffmut,polymut,sbx} [polymut]
+varop3 categorical {binrec,diffmut,polymut,sbx,none} [none]
+varop4 categorical {localsearch,none} [none]
+
+varop1binrec real [0,1] [0.5]
+varop1binrec | varop1 in {binrec}
+varop2binrec real [0,1] [0.5]
+varop2binrec | varop2 in {binrec}
+varop3binrec real [0,1] [0.5]
+varop3binrec | varop3 in {binrec}
+
+varop1diffmut categorical {rand,mean,wgi} [rand]
+varop1diffmut | varop1 in {diffmut}
+varop2diffmut categorical {rand,mean,wgi} [rand]
+varop2diffmut | varop2 in {diffmut}
+varop3diffmut categorical {rand,mean,wgi} [rand]
+varop3diffmut | varop3 in {diffmut}
+
+
+varop1polymuteta real [1,100] [20]
+varop1polymuteta | varop1 in {polymut}
+varop1polymutpm real [0,1] [0.5]
+varop1polymutpm | varop1 in {polymut}
+
+varop2polymuteta real [1,100] [20]
+varop2polymuteta | varop2 in {polymut}
+varop2polymutpm real [0,1] [0.5]
+varop2polymutpm | varop2 in {polymut}
+
+varop3polymuteta real [1,100] [20]
+varop3polymuteta | varop3 in {polymut}
+varop3polymutpm real [0,1] [0.5]
+varop3polymutpm | varop3 in {polymut}
+
+varop1sbxeta real [1,100] [20]
+varop1sbxeta | varop1 in {sbx}
+varop1sbxpc real [0,1] [1]
+varop1sbxpc | varop1 in {sbx}
+
+varop2sbxeta real [1,100] [20]
+varop2sbxeta | varop2 in {sbx}
+varop2sbxpc real [0,1] [1]
+varop2sbxpc | varop2 in {sbx}
+
+varop3sbxeta real [1,100] [20]
+varop3sbxeta | varop3 in {sbx}
+varop3sbxpc real [0,1] [1]
+varop3sbxpc | varop3 in {sbx}
+
+lstype categorical {tpqa,dvls} [tpqa]
+gammals real [0,0.5] [0.2]
+lstype | varop4 in {localsearch}
+gammals | varop4 in {localsearch}
+
+#forbidden
+##(update.name == "best") & (Tr > T)
+{Tr > T}

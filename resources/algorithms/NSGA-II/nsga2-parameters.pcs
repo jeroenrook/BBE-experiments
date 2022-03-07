@@ -1,0 +1,20 @@
+#parameters
+mu integer [1,1000] [100] #population size
+mutator categorical {mutGauss, mutPolynomial, mutUniform} [mutPolynomial]
+mutGauss_p real [0, 1] [1]
+mutGauss_sdev real [0, 1] [0.05]
+mutPolynomial_p real [0, 1] [0.2]
+mutPolynomial_eta integer [0, 100] [10]
+recombinator categorical {recCrossover, recIntermediate, recSBX} [recSBX]
+recSBX_eta real [0, 10] [5]
+recSBX_p real [0, 1] [1]
+
+#Conditional clauses
+mutGauss_p | mutator in {mutGauss}
+mutGauss_sdev | mutator in {mutGauss}
+mutPolynomial_p | mutator in {mutPolynomial}
+mutPolynomial_eta | mutator in {mutPolynomial}
+recSBX_eta | recombinator in {recSBX}
+recSBX_p | recombinator in {recSBX}
+
+#Forbidden clauses
