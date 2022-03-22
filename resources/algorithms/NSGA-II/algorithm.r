@@ -1,17 +1,17 @@
 #!/usr/bin/env Rscript
-
 #R LIBRARIES
-library(optparse)
-library(smoof)
-library(ecr)
+library("optparse")
+library("smoof")
+library("ecr")
+library("tidyverse")
 
 source("utils.r")
 
 #ARGUMENTS
 option_list = list(
-  make_option("--instance", type = "character", default = NULL, help = "instance"),
-  make_option("--budget", type = "numeric", default = 10000L, help = "The maximum number of allowed function evaluations"),
-  make_option("--seed", type = "numeric", default = 0, help = "The random seed"),
+  make_option("--instance", type = "character", default = "./instances/MMF2", help = "instance"),
+  make_option("--budget", type = "numeric", default = 20000L, help = "The maximum number of allowed function evaluations"),
+  make_option("--seed", type = "numeric", default = 1, help = "The random seed"),
   make_option("--save_solution", type= "character", default = NULL, "save solution set to an Rdata object"),
   make_option("--visualise", type= "character", default = NULL, help = "visualise population and solution set to a pdf"),
   #Add parameters here
@@ -28,17 +28,13 @@ option_list = list(
 
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
-
-# print(opt)
-
 #SET SEED
 set.seed(opt$seed)
 
-#INSTANCE LOADING
-obj.fn = parse_instance_file(opt$instance) #utils.R
+#Load instance
+obj.fn = parse_instance_file(opt$instance) #TODO move to parse_instance_file in utils.R
 #print(paste(c(smoof::getRefPoint(obj.fn))))
 writeLines(paste("c REFERENCE POINT", paste(c(smoof::getRefPoint(obj.fn)), collapse=" ")))
-
 fn.lower = smoof::getLowerBoxConstraints(obj.fn)
 fn.upper = smoof::getUpperBoxConstraints(obj.fn)
 
@@ -59,35 +55,66 @@ if (opt$recombinator == "recSBX"){
     recombinator = setup(eval(parse(text=opt$recombinator)))
 }
 
-#ALGORITHM (SMSEMOA)
+#ALGORITHM (NGSA-II)
 writeLines('c ALGORITHM NGSA-II')
-# We currently do nothing with the intermediate results, so we do not need the for-loop and can just run with the budget
-optimizer = ecr::nsga2(
-  obj.fn,
-  smoof::getNumberOfObjectives(obj.fn),
+# From ECR source:
+# nsga2 = function(
+#   fitness.fun,
+#   n.objectives = NULL,
+#   n.dim = NULL,
+#   minimize = NULL,
+#   lower = NULL,
+#   upper = NULL,
+#   mu = 100L,
+#   lambda = mu,
+#   mutator = setup(mutPolynomial, eta = 25, p = 0.2, lower = lower, upper = upper),
+#   recombinator = setup(recSBX, eta = 15, p = 0.7, lower = lower, upper = upper),
+#   terminators = list(stopOnIters(100L)),
+#   ...)
+# DEFAULT NSGA2 call
+# optimizer = ecr::nsga2(
+#   obj.fn,
+#   smoof::getNumberOfObjectives(obj.fn),
+#   lower = fn.lower,
+#   upper = fn.upper,
+#   terminators = list(stopOnEvals(max.evals = opt$budget)),
+#   #ADD parameters here
+#   mu = opt$mu,
+#   mutator = mutator,
+#   recombinator = recombinator,
+#   log.pop = TRUE,
+# )
+
+optimizer = ecr(
+  fitness.fun = obj.fn,
+  n.objectives = smoof::getNumberOfObjectives(obj.fn),
+  n.dim = n.dim,
+  minimize = NULL,
   lower = fn.lower,
   upper = fn.upper,
-  terminators = list(stopOnEvals(max.evals = opt$budget)),
-  #ADD parameters here
   mu = opt$mu,
+  lambda = opt$mu,
+  representation = "float",
+  survival.strategy = "plus",
+  parent.selector = selSimple,
   mutator = mutator,
-  recombinator = recombinator
-)
+  recombinator = recombinator,
+  log.pop = TRUE,
+  survival.selector = selNondom,
+  terminators = list(stopOnEvals(max.evals = opt$budget)))
 
-writeLines(paste("c EVALUATIONS", smoof::getNumberOfEvaluations(obj.fn)))
-
-# Parse the solution set to a common interface
-population <- do.call(rbind.data.frame, optimizer$pareto.set)
-for (dim in 1:length(population)){
-    names(population)[dim] <- paste0("x", as.character(dim))
+#Create Tibble from the run
+#TODO make more computational efficient
+df <- tibble::tibble(fun_calls = numeric(), x1 = numeric(), x2 = numeric(), y1 = numeric(), y2 = numeric())
+populations = getPopulations(optimizer$log)
+for (gen in 1:length(populations)){
+  # cat(gen)
+  pop = populations[[gen]]
+  for (individual in pop$population){
+    # cat(".")
+    fitness = attributes(individual)$fitness
+    df <- df %>% add_row(fun_calls=gen, x1=individual[1], x2=individual[2], y1=fitness[1], y2=fitness[2])
+  }
 }
 
-solution_set <- optimizer$pareto.front
-print_and_save_solution_set(solution_set)  #utils.R
-
-measures <- compute_performance_metrics(population, solution_set, obj.fn, opt$instance) #utils
-print_measures(measures) #utils
-
-
-
-
+process_run(df, obj.fn, opt)
