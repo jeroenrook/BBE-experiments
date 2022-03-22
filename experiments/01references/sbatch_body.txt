@@ -1,0 +1,16 @@
+CWD=$(pwd)
+ARGS="${ARGUMENTS[$SLURM_ARRAY_TASK_ID]}"
+IFS=', ' read -r -a ARGSA <<< "${ARGS}"
+
+tempdir="/scratch/tmp/rookj/MMMOO/01references"
+
+for SEED in "${SEEDS[@]}"
+do
+  instance=$(cd "$(dirname "${ARGSA[3]}")"; pwd)/$(basename "${ARGSA[3]}")
+  echo "${instance}"
+  echo "${tempdir}/${ARGSA[0]}_${ARGSA[1]}_${SEED}.RData"
+  cd "${ARGSA[2]}"
+  ls
+  ./algorithm.r --instance "${instance}" --budget 10000 --save_solution "${tempdir}/${ARGSA[0]}_${ARGSA[1]}_${SEED}.RData" --seed "${SEED}"
+  cd "${CWD}"
+done

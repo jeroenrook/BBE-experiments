@@ -1,0 +1,9 @@
+#!/bin/bash
+#SBATCH --job-name=MMMOO_reference_computing
+#SBATCH --output=out/%a.log
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH -c 1
+#SBATCH --mem=1250mb
+#SBATCH --time=00:45:00
+#SBATCH --partition=normal
