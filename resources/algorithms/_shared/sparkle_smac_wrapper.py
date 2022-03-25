@@ -47,7 +47,7 @@ def parse_solution_set(output_list):
         status = "CRASHED"
         measures = {k: 0 for k, v in measures.items()}
 
-    return measures
+    return status, measures
 
 # Exemplary manual call
 # ./sparkle_smac_wrapper.py ../../instances/DTLZ2 dummy 3 10 123 -mu 30
@@ -80,14 +80,7 @@ if __name__ == "__main__":
     run_time = end_time - start_time #Wallclock time
 
     # parse output
-    measures = parse_solution_set(output_list)
-    print(measures)
-    status = "SUCCESS"
-    if measures["HV"] is None:
-        status = "CRASHED"
-        measures["HV"] = 0
-        measures["IGDP"] = 2**32-1
-        measures["SP"] = 0
+    status, measures = parse_solution_set(output_list)
     target = "HV"
     #DO NOT MODIFY THE LINE BELOW IT IS USED TO CHANGE THE CONFIGURATION TARGET
     ##TARGET-REPLACE

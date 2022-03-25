@@ -34,9 +34,9 @@ set.seed(opt$seed)
 #Load instance
 obj.fn = parse_instance_file(opt$instance) #TODO move to parse_instance_file in utils.R
 #print(paste(c(smoof::getRefPoint(obj.fn))))
-writeLines(paste("c REFERENCE POINT", paste(c(smoof::getRefPoint(obj.fn)), collapse=" ")))
 fn.lower = smoof::getLowerBoxConstraints(obj.fn)
 fn.upper = smoof::getUpperBoxConstraints(obj.fn)
+writeLines(paste("c REFERENCE POINT", paste(c(smoof::getRefPoint(obj.fn)), collapse=" ")))
 
 #ARGUMENT PROCESSING
 #Mutator

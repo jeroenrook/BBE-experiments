@@ -65,30 +65,67 @@ if (opt$recombinator == "recSBX"){
 
 # ALGORITHM (SMSEMOA)
 # ===
-writeLines('c ALGORITHM SMSEMOA')
+writeLines('c ALGORITHM SMS
+writeLines(paste("c REFERENCE POINT", paste(c(smoof::getRefPoint(obj.fn)), collapse=" ")))EMOA')
 # We currently do nothing with the intermediate results, so we do not need the for-loop and can just run with the budget
-optimizer = ecr::smsemoa(
-  obj.fn,
-  smoof::getNumberOfObjectives(obj.fn),
-  lower=fn.lower,
-  upper=fn.upper,
-  terminators = list(stopOnEvals(max.evals = opt$budget)),
-  #ADD parameters here
-  mu = opt$mu,
-  mutator = mutator,
-  recombinator = recombinator,
-  );
+# optimizer = ecr::smsemoa(
+#   obj.fn,
+#   smoof::getNumberOfObjectives(obj.fn),
+#   lower=fn.lower,
+#   upper=fn.upper,
+#   terminators = list(stopOnEvals(max.evals = opt$budget)),
+#   #ADD parameters here
+#   mu = opt$mu,
+#   mutator = mutator,
+#   recombinator = recombinator,
+#   );
 
-writeLines(paste("c EVALUATIONS", smoof::getNumberOfEvaluations(obj.fn)))
+# smsemoa = function(
+#   obj.fn,
+#   n.objectives = smoof::getNumberOfObjectives(obj.fn),
+#   n.dim = NULL,
+#   minimize = NULL,
+#   lower = NULL,
+#   upper = NULL,
+#   mu = 100L,
+#   ref.point = NULL,
+#   mutator = setup(mutPolynomial, eta = 25, p = 0.2, lower = lower, upper = upper),
+#   recombinator = setup(recSBX, eta = 15, p = 0.7, lower = lower, upper = upper),
+#   terminators = list(stopOnIters(100L)),
+#   ...) {
 
-# Parse the solution set to a common interface
-population <- do.call(rbind.data.frame, optimizer$last.population)
-for (dim in 1:length(population)){
-    names(population)[dim] <- paste0("x", as.character(dim))
+reference.point <- get_reference_point(obj.fn, opt$instance)
+print(reference.point)
+optimizer <- ecr(
+    fitness.fun = obj.fn,
+    n.objectives = smoof::getNumberOfObjectives(obj.fn),
+    n.dim = n.dim,
+    lower = fn.lower,
+    upper = fn.upper,
+    mu = opt$mu,
+    lambda = 1L,
+    mutator = mutator,
+    recombinator = recombinator,
+    representation = "float",
+    survival.strategy = "plus",
+    parent.selector = ecr::selSimple,
+    survival.selector = setup(ecr::selDomHV, ref.point = reference.point),
+    terminators = list(stopOnEvals(max.evals = opt$budget)),
+    log.pop = TRUE,
+)
+
+#Create Tibble from the run
+#TODO make more computational efficient
+df <- tibble::tibble(fun_calls = numeric(), x1 = numeric(), x2 = numeric(), y1 = numeric(), y2 = numeric())
+populations = getPopulations(optimizer$log)
+for (gen in 1:length(populations)){
+  # cat(gen)
+  pop = populations[[gen]]
+  for (individual in pop$population){
+    # cat(".")
+    fitness = attributes(individual)$fitness
+    df <- df %>% add_row(fun_calls=gen, x1=individual[1], x2=individual[2], y1=fitness[1], y2=fitness[2])
+  }
 }
 
-solution_set <- optimizer$pareto.front
-print_and_save_solution_set(solution_set)  #utils.R
-
-measures <- compute_performance_metrics(population, solution_set, obj.fn, opt$instance) #utils
-print_measures(measures) #utils
+process_run(df, obj.fn, opt)

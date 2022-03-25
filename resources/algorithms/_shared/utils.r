@@ -35,6 +35,16 @@ process_run <- function(populations, fn, opt){
     print_measures(measures)
 }
 
+ get_reference_point <- function(fn, instance_path){
+     instance_name <- tail(unlist(strsplit(instance_path,"/")), n=1)
+     load("refdata.RData")
+     reference.point <- smoof::getRefPoint(fn)
+     if (is.null(reference.point)){
+         reference.point <- references[[instance_name]]$refpoint
+     }
+     return (reference.point)
+ }
+
 # populations: a Tibble with fun_calls, decision space vector, obective space vector
 # fn: smoof function
 # instance_path: string of instance path
@@ -42,10 +52,7 @@ compute_performance_metrics <- function (populations, fn, instance_path){
     #Get reference data
     instance_name <- tail(unlist(strsplit(instance_path,"/")), n=1)
     load("refdata.RData")
-    reference.point <- smoof::getRefPoint(fn)
-    if (is.null(reference.point)){
-        reference.point <- references[[instance_name]]$refpoint
-    }
+    reference.point <- get_reference_point(fn, instance_path)
     refoffset <- references[[instance_name]]$newoffset
     besthv <- references[[instance_name]]$newhv
 
