@@ -27,37 +27,27 @@ def build_param_string(params):
     return " ".join(paramstring)
 
 def parse_solution_set(output_list):
-    measure = {"HV": None, "IGDP": None, "SP": None}
+    measures = ["HV", "HVN", "SP", "ABSE", "ABSEJF"]
+    status = "SUCCESS"
+
+    measures = {k: None for k in measures}
     do_match = False
     for line in output_list:
         line = line.strip()
-        print(line)
+        if do_match:
+            for measure, _ in measures.items():
+                m = re.match(r"s {} ([\d\.e-]+)".format(measure), line)
+                if m is not None:
+                    measures[measure] = float(m.group(1))
 
         if line == "s MEASURES":
             do_match = True
 
-        m = re.match(r"s HV ([\d\.e-]+)", line)
-        if do_match and m is not None:
-            measure["HV"] = float(m.group(1))
-        m = re.match(r"s HVN ([\d\.e-]+)", line)
-        if do_match and m is not None:
-            measure["HVN"] = float(m.group(1))
-        m = re.match(r"s IGDP ([\d\.e-]+)", line)
-        if do_match and m is not None:
-            measure["IGDP"] = float(m.group(1))
-        m = re.match(r"s SP ([\d\.e-]+)", line)
-        if do_match and m is not None:
-            measure["SP"] = float(m.group(1))
-        m = re.match(r"s SPD ([\d\.e-]+)", line)
-        if do_match and m is not None:
-            measure["SPD"] = float(m.group(1))
+    if None in measures.values():
+        status = "CRASHED"
+        measures = {k: 0 for k, v in measures.items()}
 
-    if measure["HV"] is None:
-        measure["HV"] = None
-        measure["IGDP"] = 2**32-1
-        measure["SP"] = 0
-        measure["SPD"] = 0
-    return measure
+    return measures
 
 # Exemplary manual call
 # ./sparkle_smac_wrapper.py ../../instances/DTLZ2 dummy 3 10 123 -mu 30
@@ -99,6 +89,7 @@ if __name__ == "__main__":
         measures["IGDP"] = 2**32-1
         measures["SP"] = 0
     target = "HV"
+    #DO NOT MODIFY THE LINE BELOW IT IS USED TO CHANGE THE CONFIGURATION TARGET
     ##TARGET-REPLACE
     result_line = "Result for SMAC: {status}, {runtime}, {runlength}, {quality}, {seed}".format(status=status,
                                                                                       runtime=run_time,
