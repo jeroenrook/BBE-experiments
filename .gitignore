@@ -1,0 +1,4 @@
+resources/algorithms/[!\_]*/utils.r
+resources/algorithms/[!\_]*/sparkle_smac_wrapper.py
+resources/algorithms/[!\_]*/refdata.RData
+
