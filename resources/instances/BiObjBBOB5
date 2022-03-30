@@ -1,0 +1,5 @@
+# smoof currently uses the wrong iid mapping in some cases
+# smoof::makeBiObjBBOBFunction(dimensions = 2, fid = 55, iid = 1)
+
+# use moPLOT instead, iid mapping is correct here
+moPLOT::makeExtendedBiObjBBOBFunction(dimensions = 2L, fid = 55L, iid = 1L)
