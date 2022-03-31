@@ -42,6 +42,7 @@ opt = parse_args(opt_parser)
 set.seed(opt$seed)
 
 #INSTANCE LOADING
+# NB: obj.fn is already a wrapped function!
 obj.fn = parse_instance_file(opt$instance) #utils.R
 writeLines(paste("c REFERENCE POINT", paste(c(smoof::getRefPoint(obj.fn)), collapse=" ")))
 
@@ -56,7 +57,6 @@ runif_box = function(lower, upper) {
   u * (upper - lower) + lower
 }
 
-# Jakob: need to check
 nstarts = 100
 starting_points = lapply(seq_len(nstarts), function(x) runif_box(fn.lower, fn.upper))
 starting_points = do.call(rbind, starting_points)
@@ -85,44 +85,10 @@ optimizer =  run_mole(
   max_budget = opt$budget,
   logging = "none")
 
-
-# JAKOB: C&P from RMMMOO group script. Need to check what we really need.
-  # # extract relevant data, here the decision space points
-  # # and append meta-data
-  # res = lapply(mole_trace$sets, function(x)
-  #   return(as.data.frame(x$dec_space))
-  #   )
-  # res = res %>% reduce(rbind)
-  #print(optimizer$sets)
-  dec = lapply(optimizer$sets, function(x)
-    return(as.data.frame(x$dec_space))
-  )
-  dec = dec %>% reduce(rbind)
-  names(dec) <- c('x1', 'x2')
-
-  obj = lapply(optimizer$sets, function(x)
-    return(as.data.frame(x$obj_space))
-  )
-  obj = obj %>% reduce(rbind)
-  names(obj) <- c('y1', 'y2')
-  # names(res) <- c('x1', 'x2')
-  # n.rows = nrow(obj)
-
-  #print(obj)
-
-  # res$algorithm = rep_len('MOLE', n.rows)
-  # res$prob = rep_len(smoof::getID(data$fun), n.rows)
-  # if(smoof::getID(data$fun) == 'biobj_bbob_2d_2o')
-  #   res$prob = smoof::getName(data$fun)
-  # res$repl = rep_len(job$repl, n.rows)
-  # res$y1 = obj$y1
-  # res$y2 = obj$y2
-  # res$fun_calls = smoof::getNumberOfEvaluations(data$fun)
-  # end_time = Sys.time()
-  # res$rep_time = rep_len(as.double(end_time - start_time), n.rows)
-  # res = as.data.frame(res)
-  # print(res)
-
+logged_values = smoof::getLoggedValues(obj.fn)
+dec = logged_values$pars
+obj = t(logged_values$obj.vals)
+colnames(obj) = c('y1', 'y2')
 
 writeLines(paste("c EVALUATIONS", smoof::getNumberOfEvaluations(obj.fn)))
 
@@ -131,5 +97,10 @@ population <- dec
 solution_set <- obj
 print_and_save_solution_set(solution_set)  #utils.R
 
-measures <- compute_performance_metrics(population, solution_set, obj.fn, opt$instance) #utils
+# just pretend each 100 evaluations is a single population
+# that means: only cumulative measures are useful for now!
+fun_calls = rep(100 * 1:(opt$budget / 100), each = 100)
+populations = cbind(fun_calls = fun_calls, population, solution_set)
+
+measures = compute_performance_metrics(populations, obj.fn, opt$instance) #utils
 print_measures(measures) #utils
