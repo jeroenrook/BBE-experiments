@@ -94,16 +94,61 @@ compute_performance_metrics <- function (populations, fn, instance_path){
     #TODO: IDEA: Make also a tibble of the smoof logging wrapper and use that to compute the ABSE measures
 
     #TODO Jonathan: basins levels sorted on HV
-    abse <- ABSE::evalutate_results(populations, fn, ref.point=reference.point, basins = 1:5, join_fronts=FALSE)
-    measures$ABSE <- abse$basin_separated_eval
+    cat("ABSE ITERATIVE \n")
+    abse <- ABSE::evalutate_results(populations,
+                                    fn,
+                                    ref.point=reference.point,
+                                    basins = 1:4,
+                                    keep.points=TRUE,
+                                    join_fronts=FALSE)
+    measures$ABSE.HV.MEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
+    measures$ABSE.HV.AUC.MEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
+    measures$ABSE.HV.AUC.B1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
+
+    cat("ABSE CUMULATIVE \n")
+    absec <- ABSE::evalutate_results(populations,
+                                    fn,
+                                    ref.point=reference.point,
+                                    basins = 1:4,
+                                    keep.points=TRUE,
+                                    join_fronts=FALSE,
+                                    design=abse,
+                                    efficient_sets = abse$efficientSets,
+                                    dec_space_labels = abse$decSpaceLabels)
+    measures$ABSE.CUM.HV.MEAN <- -tail(absec$basin_separated_eval$mean_value, n=1)
+    measures$ABSE.CUM.HV.AUC.MEAN <- -tail(absec$basin_separated_eval$auc_hv_mean, n=1)
+    measures$ABSE.CUM.HV.AUC.B1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
+
+    cat("ABSE JF ITERATIVE \n")
+    abse <- ABSE::evalutate_results(populations,
+                                    fn,
+                                    ref.point=reference.point,
+                                    basins = 1:4,
+                                    keep.points=TRUE,
+                                    join_fronts=FALSE,
+                                    design=abse)
+    measures$ABSE.JF.HV.MEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
+    measures$ABSE.JF.HV.AUC.MEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
+    measures$ABSE.JF.HV.AUC.B1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
+
+    cat("ABSE JF CUMULATIVE \n")
+    absec <- ABSE::evalutate_results(populations,
+                                    fn,
+                                    ref.point=reference.point,
+                                    basins = 1:4,
+                                    keep.points=TRUE,
+                                    join_fronts=FALSE,
+                                    design=abse,
+                                    efficient_sets = abse$efficientSets,
+                                    dec_space_labels = abse$decSpaceLabels)
+    measures$ABSE.JF.CUM.HV.MEAN <- -tail(absec$basin_separated_eval$mean_value, n=1)
+    measures$ABSE.JF.CUM.HV.AUC.MEAN <- -tail(absec$basin_separated_eval$auc_hv_mean, n=1)
+    measures$ABSE.JF.CUM.HV.AUC.B1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
+
     #AUC of trajectory
     #AUC of cummulative population generations#TODO Jonathan:  in ABSE package as option
     #ABSE score of all function calls combined (From smoof logger = fn)
     #ABSE score for last population
-
-    #ABSE Join fronts
-    #TODO Jonathan: reuse redundant computation somehow: return object from previous abse call
-    measures$ABSEJF <- NULL#ABSE::evalutate_results(populations, fn, ref.point=reference.point, basins = 1:5, join_fronts=TRUE)
 
     return(measures)
 }
