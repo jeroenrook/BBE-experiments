@@ -90,17 +90,16 @@ dec = logged_values$pars
 obj = t(logged_values$obj.vals)
 colnames(obj) = c('y1', 'y2')
 
-writeLines(paste("c EVALUATIONS", smoof::getNumberOfEvaluations(obj.fn)))
-
 # Parse the solution set to a common interface
 population <- dec
 solution_set <- obj
-print_and_save_solution_set(solution_set)  #utils.R
 
 # just pretend each 100 evaluations is a single population
 # that means: only cumulative measures are useful for now!
 fun_calls = rep(100 * 1:(opt$budget / 100), each = 100)
 populations = cbind(fun_calls = fun_calls, population, solution_set)
 
-measures = compute_performance_metrics(populations, obj.fn, opt$instance) #utils
-print_measures(measures) #utils
+df = as_tibble(populations)
+print(df)
+
+process_run(df, obj.fn, opt)

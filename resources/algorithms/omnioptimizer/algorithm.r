@@ -60,7 +60,7 @@ optimizer = omniopt(
   obj.fn,
   pop.size = 4 * opt$pop_size, # NOTE: requireed to always be a multiple of 4
   n.gens = budget,
-  frequency =  budget, # do not store intermediate results
+  frequency = 100,
   p.cross = opt$p_cross,
   p.mut = opt$p_mut,
   eta.cross = opt$eta_cross,
@@ -74,13 +74,24 @@ optimizer = omniopt(
   verbose = FALSE
 )
 
-writeLines(paste("c EVALUATIONS", smoof::getNumberOfEvaluations(obj.fn)))
+gennumber = 0
+df = NULL
+for( gen in optimizer$history){
+    dec = tibble::as_tibble(t(gen$dec))
+    dec = dplyr::rename_with(dec, ~ gsub("V", "x", .x, fixed=TRUE))
 
-# Parse the solution set to a common interface
-population <- as.data.frame(t(optimizer$dec))
-solution_set <- as.data.frame(t(optimizer$obj))
-print_and_save_solution_set(solution_set)  #utils.R
+    obj = tibble::as_tibble(t(gen$dec))
+    obj = dplyr::rename_with(obj, ~ gsub("V", "y", .x, fixed=TRUE))
 
-measures <- compute_performance_metrics(population, solution_set, obj.fn, opt$instance) #utils
-print_measures(measures) #utils
+    gendf = dplyr::bind_cols(fun_calls=rep(gennumber * 100, dim(dec)[1]) ,dec, obj)
+    gennumber = gennumber + 1
 
+    if(is.null(df)){
+        df = gendf
+    } else {
+        df = dplyr::bind_rows(df, gendf)
+    }
+
+}
+
+process_run(df, obj.fn, opt)

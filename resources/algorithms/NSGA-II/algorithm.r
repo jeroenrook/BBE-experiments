@@ -113,7 +113,7 @@ for (gen in 1:length(populations)){
   for (individual in pop$population){
     # cat(".")
     fitness = attributes(individual)$fitness
-    df <- df %>% add_row(fun_calls=gen, x1=individual[1], x2=individual[2], y1=fitness[1], y2=fitness[2])
+    df <- df %>% add_row(fun_calls=gen*100, x1=individual[1], x2=individual[2], y1=fitness[1], y2=fitness[2])
   }
 }
 

@@ -3,7 +3,7 @@ library("ecr3vis")
 library("ABSE")
 library("tidyverse")
 
-options(error = quote({dump.frames(to.file=TRUE); q()}))
+#options(error = quote({dump.frames(to.file=TRUE); q()}))
 
 parse_instance_file <- function(filename,budget=1000){
     content <- readChar(filename, nchars=file.info(filename)$size)
