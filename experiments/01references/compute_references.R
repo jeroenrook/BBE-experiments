@@ -1,12 +1,8 @@
 #!/usr/bin/env Rscript
-
 library(smoof)
+library(moPLOT)
 
-set.seed(2021)
-seeds <- sample(1:100000, 10, replace=FALSE)
-print(seeds)
-seeds.bash <- paste("SEEDS=(", paste(c(seeds), collapse=" "),")", sep="")
-
+#ALl instances
 #Get all instances
 instances.path <- "../../resources/instances/"
 instances <- list.files(instances.path)
@@ -17,64 +13,37 @@ parse_instance_file = function(filename){
 }
 print(instances)
 
+manual_references <- read.csv(file = 'manual_points.csv')
+print(manual_references)
 
-#Get all algorithms
-algorithms.path <- "../../resources/algorithms/"
-algorithms <- list.files(algorithms.path)
-algorithms <- algorithms[algorithms != "_shared"]
-algorithms <- algorithms[algorithms != "distribute_shared_files.sh"]
-print(algorithms)
+references <- list()
+for (instance in instances){
+  instance.path = paste0(instances.path,instance)
+  fn <- readChar(instance.path, nchars=file.info(instance.path)$size)
+  fn <- eval(parse(text=fn))
 
-commands.list <- c()
-for (algorithm in algorithms){
-  algorithm.path <- paste(algorithms.path,algorithm,"/", sep="")
-  writeLines(paste(">>>> \t", algorithm.path))
-
-  #try algorithm
-  command <- paste(algorithm.path,
-                   "--instance",
-                   "../../resources/instances/BiObjBBOB1",
-                   "--budget 100",
-                   "--seed 1")
-  writeLines(command)
-  out <- system(command, ignore.stdout = TRUE, ignore.stderr = TRUE)
-  # if (out != 0){
-  #   writeLines("FAILED")
-  #   writeLines(out)
-  #   next
-  # }
+  #Use moPLOT to approximate the achievable HV
+  design <- moPLOT::generateDesign(fn, points.per.dimension=512)
+  design$obj.space <- calculateObjectiveValues(design$dec.space, fn, parallelize = T)
+  nds <- design$obj.space[ecr::nondominated(t(design$obj.space)),] #Perato front
 
 
-  for (instance in instances){
-    instance.path <- paste(instances.path,instance, sep="")
-    #writeLines(instance.path)
-
-    # temp.path <- paste("tmp/", instance, "_", algorithm, "_", as.character(seed), ".RData", sep="")
-    # command <- paste(algorithm.path,
-    #                  "--instance",
-    #                  instance.path,
-    #                  "--budget 1000",
-    #                  "--save_solution",
-    #                  temp.path)
-
-    #writeLines(paste(algorithm.path, instance.path))
-    commands.list[[(length(commands.list) + 1)]] <- paste("\"",
-                                                          algorithm, " ",
-                                                          instance, " ",
-                                                          algorithm.path, " ",
-                                                          instance.path, "\"",
-                                                          sep="")
-
-    #writeLines(command)
+  if(instance %in% manual_references$Instance){
+    # 1. Check for manual entry
+    ref <- manual_references[manual_references$Instance == instance, c("y1", "y2")]
+    ref <- as.double(ref)
+  } else if(!is.null(smoof::getRefPoint(fn))){
+    # 2. Check for smoof reference
+    ref <- smoof::getRefPoint(fn)
+  } else{
+    # 3. moPLOT
+    ref <- as.vector(apply(nds, 2, max))
   }
+
+  #Compute max hv
+  hv = ecr3vis::hv(t(nds), ref)
+
+  references[[instance]] <- list(refpoint=ref, hv=hv)
 }
 
-sink("script.sh")
-writeLines(readLines("sbatch_headers.txt"))
-writeLines(paste("#SBATCH --array=0-",as.character(length(commands.list)),sep=""))
-writeLines(seeds.bash)
-cat("ARGUMENTS=(")
-cat(paste(commands.list, collapse=" \\\n"))
-cat(")\n\n")
-writeLines(readLines("sbatch_body.txt"))
-sink()
+save(references, file="refdata.RData")
