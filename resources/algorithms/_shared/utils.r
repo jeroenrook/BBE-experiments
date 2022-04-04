@@ -89,7 +89,7 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
-                                    keep.points=TRUE,
+                                    keep.points=FALSE,
                                     join_fronts=FALSE)
     measures$ABSE.HV.MEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
     measures$ABSE.HV.AUC.MEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
@@ -114,8 +114,8 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
-                                    keep.points=TRUE,
-                                    join_fronts=FALSE,
+                                    keep.points=FALSE,
+                                    join_fronts=TRUE,
                                     design=abse)
     measures$ABSE.JF.HV.MEAN <- -tail(absej$basin_separated_eval$mean_value, n=1)
     measures$ABSE.JF.HV.AUC.MEAN <- -tail(absej$basin_separated_eval$auc_hv_mean, n=1)
@@ -127,18 +127,13 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     ref.point=reference.point,
                                     basins = 1:4,
                                     keep.points=TRUE,
-                                    join_fronts=FALSE,
+                                    join_fronts=TRUE,
                                     design=abse,
                                     efficient_sets = abse$efficientSets,
                                     dec_space_labels = abse$decSpaceLabels)
     measures$ABSE.JF.CUM.HV.MEAN <- -tail(absejc$basin_separated_eval$mean_value, n=1)
     measures$ABSE.JF.CUM.HV.AUC.MEAN <- -tail(absejc$basin_separated_eval$auc_hv_mean, n=1)
     measures$ABSE.JF.CUM.HV.AUC.B1 <- -tail(absejc$basin_separated_eval$auc_hv1, n=1)
-
-    #AUC of trajectory
-    #AUC of cummulative population generations#TODO Jonathan:  in ABSE package as option
-    #ABSE score of all function calls combined (From smoof logger = fn)
-    #ABSE score for last population
 
 
     if(!is.null(opt$visualise)){
