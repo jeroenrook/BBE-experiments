@@ -5,6 +5,16 @@ import itertools
 import argparse
 import pandas as pd
 import joblib
+import numpy as np
+
+import rpy2.robjects as robjects
+import rpy2.robjects.numpy2ri
+rpy2.robjects.numpy2ri.activate()
+
+import rpy2.robjects.pandas2ri
+rpy2.robjects.pandas2ri.activate()
+
+from tqdm import tqdm
 
 if __name__ == "__main__":
     EXP_NAME = os.path.basename(os.getcwd())
@@ -28,5 +38,50 @@ if __name__ == "__main__":
     print(df)
     df.to_csv("results.csv")
 
-    output_dir = f"{EXP_DIR}/visualisation"
-    os.system("cp -r {output_dir} visualisation")
+    print("Parse visualisations")
+    def load_rdata(filepath):
+        data = robjects.r['load'](filepath)
+
+        objnames = ["dec.space", "dims", "step.sizes", "obj.space", "efficientSets", "decSpaceLabels",
+                    "basin_separated_eval"]
+
+        result = {}
+
+        for i, objname in enumerate(data):
+            obj = robjects.r[objname]
+            objdict = {}
+            for j, field in enumerate(obj):
+                if j < 6:
+                    o = np.array(obj[j])
+                else:
+                    o = pd.DataFrame(obj[j])
+                objdict[objnames[j]] = o
+            result[objname] = objdict
+
+        return result
+
+
+    df = None
+    for file in tqdm(os.listdir("visualisation")):
+        if file[-6:] != ".Rdata":
+            continue
+        instance, solver = file[:-6].split("_")
+        #     print(f"{instance} - {solver}")
+
+        data = load_rdata(os.path.join("visualisation", file))
+        #     tdf = data["abse"]["basin_separated_eval"]
+        for absetype in ["abse", "absec"]:
+            tdf = data[absetype]["basin_separated_eval"].T
+            tdf = tdf.set_axis(['fun_calls', 'value_basin1', 'value_basin2', 'value_basin3', 'value_basin4', 'mean_value', 'auc_hv_mean', 'auc_hv1'],
+                               axis=1,
+                               inplace=False)
+            tdf["type"] = absetype
+            tdf["instance"] = instance
+            tdf["solver"] = solver
+
+            if df is None:
+                df = tdf
+            else:
+                df = pd.concat([df, tdf], ignore_index=True)
+    print(df)
+    df.to_csv("abse_tables.csv")

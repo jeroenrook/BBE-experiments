@@ -15,7 +15,7 @@ option_list = list(
   make_option("--save_solution", type= "character", default = NULL, "save solution set to an Rdata object"),
   make_option("--visualise", type= "character", default = NULL, help = "visualise population and solution set to a pdf"),
   #Add parameters here
-  make_option("--pop_size", type = "numeric", default = 4L),
+  make_option("--pop_size", type = "numeric", default = 25L),
   make_option("--p_cross", type = "numeric", default = 0.6, help = ""),
   make_option("--p_mut", type = "numeric", default = 0.1, help = ""),
   make_option("--eta_cross", type = "numeric", default = 20, help = ""),
@@ -58,9 +58,9 @@ writeLines('c ALGORITHM OmniOptimizer')
 budget = floor(opt$budget / (4 * opt$pop_size)) # number of generations
 optimizer = omniopt(
   obj.fn,
-  pop.size = 4 * opt$pop_size, # NOTE: requireed to always be a multiple of 4
+  pop.size = 4 * opt$pop_size, # NOTE: required to always be a multiple of 4
   n.gens = budget,
-  frequency = 100,
+  frequency = 1,
   p.cross = opt$p_cross,
   p.mut = opt$p_mut,
   eta.cross = opt$eta_cross,
@@ -77,13 +77,16 @@ optimizer = omniopt(
 gennumber = 0
 df = NULL
 for( gen in optimizer$history){
+    if(is.null(gen)){
+        next
+    }
     dec = tibble::as_tibble(t(gen$dec))
     dec = dplyr::rename_with(dec, ~ gsub("V", "x", .x, fixed=TRUE))
 
     obj = tibble::as_tibble(t(gen$dec))
     obj = dplyr::rename_with(obj, ~ gsub("V", "y", .x, fixed=TRUE))
 
-    gendf = dplyr::bind_cols(fun_calls=rep(gennumber * 100, dim(dec)[1]) ,dec, obj)
+    gendf = dplyr::bind_cols(fun_calls=rep(gennumber * 4 * opt$pop_size, dim(dec)[1]) ,dec, obj)
     gennumber = gennumber + 1
 
     if(is.null(df)){

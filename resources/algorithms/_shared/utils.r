@@ -2,6 +2,7 @@ library("smoof")
 library("ecr3vis")
 library("ABSE")
 library("tidyverse")
+library("moPLOT")
 
 #options(error = quote({dump.frames(to.file=TRUE); q()}))
 
@@ -79,17 +80,13 @@ compute_performance_metrics <- function (populations, fn, opt){
         measures$SP <- -1
     }
 
-    #ABSE
-    #TODO: IDEA: Make also a tibble of the smoof logging wrapper and use that to compute the ABSE measures
-
-    #TODO Jonathan: basins levels sorted on HV
     cat("ABSE ITERATIVE! \n")
     unwrapped.fn = smoof::getWrappedFunction(fn)
     abse <- ABSE::evalutate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
-                                    keep.points=FALSE,
+                                    keep_points=FALSE,
                                     join_fronts=FALSE)
     measures$ABSE.HV.MEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
     measures$ABSE.HV.AUC.MEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
@@ -100,7 +97,7 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
-                                    keep.points=TRUE,
+                                    keep_points=TRUE,
                                     join_fronts=FALSE,
                                     design=abse,
                                     efficient_sets = abse$efficientSets,
@@ -114,7 +111,7 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
-                                    keep.points=FALSE,
+                                    keep_points=FALSE,
                                     join_fronts=TRUE,
                                     design=abse)
     measures$ABSE.JF.HV.MEAN <- -tail(absej$basin_separated_eval$mean_value, n=1)
@@ -126,11 +123,9 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
-                                    keep.points=TRUE,
+                                    keep_points=TRUE,
                                     join_fronts=TRUE,
-                                    design=abse,
-                                    efficient_sets = abse$efficientSets,
-                                    dec_space_labels = abse$decSpaceLabels)
+                                    design=abse)
     measures$ABSE.JF.CUM.HV.MEAN <- -tail(absejc$basin_separated_eval$mean_value, n=1)
     measures$ABSE.JF.CUM.HV.AUC.MEAN <- -tail(absejc$basin_separated_eval$auc_hv_mean, n=1)
     measures$ABSE.JF.CUM.HV.AUC.B1 <- -tail(absejc$basin_separated_eval$auc_hv1, n=1)
@@ -143,6 +138,7 @@ compute_performance_metrics <- function (populations, fn, opt){
         # plot(t(solution_set), main="Objective space")
         # plot(t(pareto.matrix), main="Non-dominated set in objective space")
         # dev.off()
+        design <- abse
         output <- paste0(opt$visualise,".Rdata")
         save(abse, absec, absej, absejc, file=output)
     }

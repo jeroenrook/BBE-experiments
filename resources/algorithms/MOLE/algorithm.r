@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 
+
 #R LIBRARIES
 library(optparse)
 library(smoof)
@@ -57,7 +58,7 @@ runif_box = function(lower, upper) {
   u * (upper - lower) + lower
 }
 
-nstarts = 100
+nstarts = 1000
 starting_points = lapply(seq_len(nstarts), function(x) runif_box(fn.lower, fn.upper))
 starting_points = do.call(rbind, starting_points)
 

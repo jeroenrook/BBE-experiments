@@ -119,7 +119,9 @@ optimizer <- ecr(
 df <- tibble::tibble(fun_calls = numeric(), x1 = numeric(), x2 = numeric(), y1 = numeric(), y2 = numeric())
 populations = getPopulations(optimizer$log)
 for (gen in 1:length(populations)){
-  # cat(gen)
+  if (gen %% 100 != 0){
+    next
+  }
   pop = populations[[gen]]
   for (individual in pop$population){
     # cat(".")
