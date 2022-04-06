@@ -1,5 +1,5 @@
 #parameters
-pop_size integer [1, 250] [1] # population size (multiple of 4; thus multiplied later in the script)
+#pop_size integer [1, 250] [1] # population size (multiple of 4; thus multiplied later in the script)
 p_cross real [0.6, 1] [0.6] # probability of crossover
 p_mut real [0, 1] [0.1] # probability of mutation
 eta_cross real [5, 20] [20] # value of distribution index for crossover

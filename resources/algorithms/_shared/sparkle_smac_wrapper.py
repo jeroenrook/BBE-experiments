@@ -27,7 +27,12 @@ def build_param_string(params):
     return " ".join(paramstring)
 
 def parse_solution_set(output_list):
-    measures = ["HV", "HVN", "SP", "ABSE", "ABSEJF"]
+    measures = ["HV", "HVN", "SP",
+                "ABSEHVMEAN", "ABSEHVMEANNORM", "ABSEHVAUCMEAN", "ABSEHVAUCMEANNORM", "ABSEHVAUCB1",
+                "ABSECUMHVMEAN", "ABSECUMHVMEANNORM", "ABSECUMHVAUCMEAN", "ABSECUMHVAUCMEANNORM", "ABSECUMHVAUCB1",
+                "ABSEJFHVMEAN", "ABSEJFHVAUCMEAN", "ABSEJFHVAUCB1",
+                "ABSEJFCUMHVMEAN", "ABSEJFCUMHVAUCMEAN", "ABSEJFCUMHVAUCB1",
+                ]
     status = "SUCCESS"
 
     measures = {k: None for k in measures}
@@ -70,7 +75,7 @@ if __name__ == "__main__":
     assert(len(params) % 2 == 0) #require even number of parameters
     paramstring = build_param_string(params)
 
-    command = f"{solver_binary} --instance {instance} --seed {seed} --budget 20000 {paramstring}"
+    command = f"{solver_binary} --instance {instance} --seed {seed} --budget 25000 {paramstring}"
     print(command)
 
     # get output

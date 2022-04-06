@@ -11,7 +11,7 @@ descent_history_size integer [1, 2147483647] [100] # history size for nonmonoton
 descent_max_iter integer [1, 2147483647] [1000] # maximum number of iterations for gradient descent
 explore_step_min real [0.000001, 100] [0.0001] # minimum step size
 explore_step_max real [0.01, 100] [0.1] # minimum step size
-explore_angle_max integer [10, 90] [45] # maximum angle per step
+explore_angle_max integer [10, 90] [45]# # maximum angle per step
 explore_scale_factor real [1.1, 5] [2] # step size scaling factor
 refine_after_nstarts integer [1, 100] [100]
 refine_hv_target real [0.000001, 0.1] [0.00002] # precision (relating to normalized HV, i.e. area between nadir and ideal = 1)

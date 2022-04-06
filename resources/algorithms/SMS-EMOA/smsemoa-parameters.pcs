@@ -1,5 +1,5 @@
 #parameters
-mu integer [1,1000] [100] #population size
+#mu integer [1,1000] [100] #population size
 mutator categorical {mutGauss, mutPolynomial, mutUniform} [mutPolynomial]
 mutGauss_p real [0, 1] [1]
 mutGauss_sdev real [0, 1] [0.05]
