@@ -34,6 +34,21 @@ process_run <- function(populations, fn, opt){
      return (reference.point)
  }
 
+get_tibble_logger <- function(fn){
+    logged_values <- smoof::getLoggedValues(fn)
+    dec <- logged_values$pars
+    obj <- t(logged_values$obj.vals)
+    colnames(dec) <- c('x1', 'x2')
+    colnames(obj) <- c('y1', 'y2')
+    # just pretend each 100 evaluations is a single population
+    # that means: only cumulative measures are useful for now!
+    fun_calls = rep(100 * 1:(dim(dec)[1] / 100), each = 100)
+    populations = cbind(fun_calls = fun_calls, dec, obj)
+    populations = as_tibble(populations)
+
+    return(populations)
+}
+
 # populations: a Tibble with fun_calls, decision space vector, obective space vector
 # fn: smoof function
 # instance_path: string of instance path
@@ -90,12 +105,14 @@ compute_performance_metrics <- function (populations, fn, opt){
                                     join_fronts=FALSE)
     measures$ABSEHVMEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
     measures$ABSEHVMEANNORM <- measures$ABSEHVMEAN / besthv
-    measures$ABSEHVAUCMEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
-    measures$ABSEHVAUCMEANNORM <- measures$ABSEHVAUCMEAN / besthv
-    measures$ABSEHVAUCB1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
+    # measures$ABSEHVAUCMEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
+    # measures$ABSEHVAUCMEANNORM <- measures$ABSEHVAUCMEAN / besthv
+    # measures$ABSEHVAUCB1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE CUMULATIVE \n")
-    absec <- ABSE::evalutate_results(populations,
+
+    fnpopulations = get_tibble_logger(fn)
+    absec <- ABSE::evalutate_results(fnpopulations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -108,31 +125,31 @@ compute_performance_metrics <- function (populations, fn, opt){
     measures$ABSECUMHVMEANNORM <- measures$ABSECUMHVMEAN / besthv
     measures$ABSECUMHVAUCMEAN <- -tail(absec$basin_separated_eval$auc_hv_mean, n=1)
     measures$ABSECUMHVAUCMEANNORM <- measures$ABSECUMHVAUCMEAN / besthv
-    measures$ABSECUMHVAUCB1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
+    # measures$ABSECUMHVAUCB1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
 
-    cat("ABSE JF ITERATIVE \n")
-    absej <- ABSE::evalutate_results(populations,
-                                    unwrapped.fn,
-                                    ref.point=reference.point,
-                                    basins = 1:4,
-                                    keep_points=FALSE,
-                                    join_fronts=TRUE,
-                                    design=abse)
-    measures$ABSEJFHVMEAN <- -tail(absej$basin_separated_eval$mean_value, n=1)
-    measures$ABSEJFHVAUCMEAN <- -tail(absej$basin_separated_eval$auc_hv_mean, n=1)
-    measures$ABSEJFHVAUCB1 <- -tail(absej$basin_separated_eval$auc_hv1, n=1)
-
-    cat("ABSE JF CUMULATIVE \n")
-    absejc <- ABSE::evalutate_results(populations,
-                                    unwrapped.fn,
-                                    ref.point=reference.point,
-                                    basins = 1:4,
-                                    keep_points=TRUE,
-                                    join_fronts=TRUE,
-                                    design=abse)
-    measures$ABSEJFCUMHVMEAN <- -tail(absejc$basin_separated_eval$mean_value, n=1)
-    measures$ABSEJFCUMHVAUCMEAN <- -tail(absejc$basin_separated_eval$auc_hv_mean, n=1)
-    measures$ABSEJFCUMHVAUCB1 <- -tail(absejc$basin_separated_eval$auc_hv1, n=1)
+    # cat("ABSE JF ITERATIVE \n")
+    # absej <- ABSE::evalutate_results(populations,
+    #                                 unwrapped.fn,
+    #                                 ref.point=reference.point,
+    #                                 basins = 1:4,
+    #                                 keep_points=FALSE,
+    #                                 join_fronts=TRUE,
+    #                                 design=abse)
+    # measures$ABSEJFHVMEAN <- -tail(absej$basin_separated_eval$mean_value, n=1)
+    # measures$ABSEJFHVAUCMEAN <- -tail(absej$basin_separated_eval$auc_hv_mean, n=1)
+    # measures$ABSEJFHVAUCB1 <- -tail(absej$basin_separated_eval$auc_hv1, n=1)
+    #
+    # cat("ABSE JF CUMULATIVE \n")
+    # absejc <- ABSE::evalutate_results(populations,
+    #                                 unwrapped.fn,
+    #                                 ref.point=reference.point,
+    #                                 basins = 1:4,
+    #                                 keep_points=TRUE,
+    #                                 join_fronts=TRUE,
+    #                                 design=abse)
+    # measures$ABSEJFCUMHVMEAN <- -tail(absejc$basin_separated_eval$mean_value, n=1)
+    # measures$ABSEJFCUMHVAUCMEAN <- -tail(absejc$basin_separated_eval$auc_hv_mean, n=1)
+    # measures$ABSEJFCUMHVAUCB1 <- -tail(absejc$basin_separated_eval$auc_hv1, n=1)
 
 
     if(!is.null(opt$visualise)){

@@ -28,17 +28,19 @@ for (instance in instances){
   nds <- design$obj.space[ecr::nondominated(t(design$obj.space)),] #Perato front
 
 
-  if(instance %in% manual_references$Instance){
-    # 1. Check for manual entry
-    ref <- manual_references[manual_references$Instance == instance, c("y1", "y2")]
-    ref <- as.double(ref)
-  } else if(!is.null(smoof::getRefPoint(fn))){
-    # 2. Check for smoof reference
-    ref <- smoof::getRefPoint(fn)
-  } else{
-    # 3. moPLOT
-    ref <- as.vector(apply(nds, 2, max))
-  }
+  ref <- ceiling(as.vector(apply(design$obj.space, 2, max))) + 1
+  print(ref)
+  # if(instance %in% manual_references$Instance){
+  #   # 1. Check for manual entry
+  #   ref <- manual_references[manual_references$Instance == instance, c("y1", "y2")]
+  #   ref <- as.double(ref)
+  # } else if(!is.null(smoof::getRefPoint(fn))){
+  #   # 2. Check for smoof reference
+  #   ref <- smoof::getRefPoint(fn)
+  # } else{
+  #   # 3. moPLOT
+  #   ref <- as.vector(apply(nds, 2, max))
+  # }
 
   #Compute max hv
   hv = ecr3vis::hv(t(nds), ref)
