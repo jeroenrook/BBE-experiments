@@ -9,11 +9,11 @@ if __name__ == "__main__":
     # Make scratch directory
     EXP_DIR = f"/scratch/tmp/rookj/tmp/ABSE/{EXP_NAME}"
     output_dir = f"{EXP_DIR}/validation"
-    # os.system(f"rm -rf {output_dir}")
+    os.system(f"rm -rf {output_dir}")
     os.system(f"mkdir {output_dir}")
 
     visualisations_path = "visualisation"
-    # os.system(f"rm -rf ./{visualisations_path}")
+    os.system(f"rm -rf ./{visualisations_path}")
     os.system(f"mkdir ./{visualisations_path}")
 
     #Load instances
@@ -26,8 +26,7 @@ if __name__ == "__main__":
     algorithms_path = "../../resources/algorithms"
     algorithms = []
     for a in os.listdir(algorithms_path):
-        # if a not in ["SMS-EMOA", "NSGA-II", "omnioptimizer", "MOLE"]:
-        if a not in ["MOLE"]:
+        if a not in ["SMS-EMOA", "NSGA-II", "omnioptimizer", "MOLE"]:
             continue
         algorithms.append(a)
 
@@ -41,6 +40,6 @@ if __name__ == "__main__":
         instance_path = os.path.join(instances_path, instance)
         algorithm_path = os.path.join(algorithms_path, algorithm)
 
-        command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {algorithm_path} --runs 1 --budget 100000 --output {output_path} --visualise {visualisation_path}"
+        command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {algorithm_path} --runs 10 --budget 50000 --output {output_path} --visualise {visualisation_path}"
         print(command)
         os.system(command)

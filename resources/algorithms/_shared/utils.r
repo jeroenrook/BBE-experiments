@@ -13,7 +13,7 @@ parse_instance_file <- function(filename,budget=1000){
     return(obj.fn)
 }
 
-process_run <- function(populations, fn, opt){
+process_run <- function(populations, fn, opt, ...){
     measures <- compute_performance_metrics(df, obj.fn, opt)
 
     if (!is.null(opt$save_solution)){
@@ -27,10 +27,7 @@ process_run <- function(populations, fn, opt){
  get_reference_point <- function(fn, instance_path){
      instance_name <- tail(unlist(strsplit(instance_path,"/")), n=1)
      load("refdata.RData")
-     reference.point <- smoof::getRefPoint(fn)
-     if (is.null(reference.point)){
-         reference.point <- references[[instance_name]]$refpoint
-     }
+     reference.point <- references[[instance_name]]$refpoint
      return (reference.point)
  }
 
@@ -52,7 +49,7 @@ get_tibble_logger <- function(fn){
 # populations: a Tibble with fun_calls, decision space vector, obective space vector
 # fn: smoof function
 # instance_path: string of instance path
-compute_performance_metrics <- function (populations, fn, opt){
+compute_performance_metrics <- function (populations, fn, opt, last_pop=NULL){
     #Get reference data
     instance_path = opt$instance
     instance_name <- tail(unlist(strsplit(instance_path,"/")), n=1)
@@ -61,11 +58,12 @@ compute_performance_metrics <- function (populations, fn, opt){
     #refoffset <- references[[instance_name]]$newoffset
     besthv <- references[[instance_name]]$hv
 
-    #Destil last population from tibble
-    last_pop <- populations %>% filter(max(populations$fun_calls) == populations$fun_calls)
+    if(is.null(last_pop)){
+        #Destil last population from tibble
+        last_pop <- populations %>% filter(max(populations$fun_calls) == populations$fun_calls)
+    }
     # last non-dominated population's objective space for HV
     solution_set <- t(as.matrix(last_pop %>% select(y1, y2)))
-    solution_set <- solution_set[, ecr::nondominated(solution_set)]
     # last population's desision space for SP
     population <- t(as.matrix(last_pop %>% select(x1, x2)))
 
@@ -73,14 +71,17 @@ compute_performance_metrics <- function (populations, fn, opt){
     measures <- list()
     #HV MAXIMISE, hence minimise
     if(is.matrix(solution_set)){
+        # cat("ecr3vis::hv \n")
         #Limit for MOGSA and MOLE to prevent memory issues
         if(ncol(solution_set) > 2000) solution_set <- solution_set[,sample(ncol(solution_set), 2000)]
         measures$HV <- -ecr3vis::hv(solution_set, reference.point)
     }
     else if(sum(reference.point < solution_set) == length(reference.point)){
+        # cat("prod(reference.point - (solution_set)) \n")
         measures$HV <- -prod(reference.point - (solution_set))
     }
     else {
+        # cat("HV = 0 \n")
         measures$HV <- 0
     }
     measures$HVN <- measures$HV / besthv #Normalized
@@ -100,7 +101,7 @@ compute_performance_metrics <- function (populations, fn, opt){
     abse <- ABSE::evalutate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
-                                    basins = 1:4,
+                                    basins = 1:40,
                                     keep_points=FALSE,
                                     join_fronts=FALSE)
     measures$ABSEHVMEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
@@ -115,7 +116,7 @@ compute_performance_metrics <- function (populations, fn, opt){
     absec <- ABSE::evalutate_results(fnpopulations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
-                                    basins = 1:4,
+                                    basins = 1:40,
                                     keep_points=TRUE,
                                     join_fronts=FALSE,
                                     design=abse,

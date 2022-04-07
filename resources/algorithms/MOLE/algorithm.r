@@ -58,7 +58,7 @@ runif_box = function(lower, upper) {
   u * (upper - lower) + lower
 }
 
-nstarts = 1000
+nstarts = opt$budget
 starting_points = lapply(seq_len(nstarts), function(x) runif_box(fn.lower, fn.upper))
 starting_points = do.call(rbind, starting_points)
 
@@ -86,6 +86,24 @@ optimizer =  run_mole(
   max_budget = opt$budget,
   logging = "none")
 
+dec = lapply(optimizer$sets, function(x)
+  return(as.data.frame(x$dec_space))
+)
+dec = dec %>% reduce(rbind)
+names(dec) <- c('x1', 'x2')
+
+obj = lapply(optimizer$sets, function(x)
+  return(as.data.frame(x$obj_space))
+)
+obj = obj %>% reduce(rbind)
+names(obj) <- c('y1', 'y2')
+last_pop <- as_tibble(cbind(dec, obj))
+
+if(nrow(last_pop) > 100){
+  print("Sample last population!")
+  last_pop <- last_pop[sample(nrow(last_pop), 100),]
+}
+
 logged_values = smoof::getLoggedValues(obj.fn)
 dec = logged_values$pars
 obj = t(logged_values$obj.vals)
@@ -101,6 +119,5 @@ fun_calls = rep(100 * 1:(opt$budget / 100), each = 100)
 populations = cbind(fun_calls = fun_calls, population, solution_set)
 
 df = as_tibble(populations)
-print(df)
 
-process_run(df, obj.fn, opt)
+process_run(df, obj.fn, opt, last_pop=last_pop)
