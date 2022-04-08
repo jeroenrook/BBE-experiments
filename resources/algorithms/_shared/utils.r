@@ -82,7 +82,7 @@ compute_performance_metrics <- function (populations, fn, opt){
 
     cat("ABSE ITERATIVE! \n")
     unwrapped.fn = smoof::getWrappedFunction(fn)
-    abse <- ABSE::evalutate_results(populations,
+    abse <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -95,7 +95,7 @@ compute_performance_metrics <- function (populations, fn, opt){
     measures$ABSEHVAUCB1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE CUMULATIVE \n")
-    absec <- ABSE::evalutate_results(populations,
+    absec <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -111,7 +111,7 @@ compute_performance_metrics <- function (populations, fn, opt){
     measures$ABSECUMHVAUCB1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE JF ITERATIVE \n")
-    absej <- ABSE::evalutate_results(populations,
+    absej <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -123,7 +123,7 @@ compute_performance_metrics <- function (populations, fn, opt){
     measures$ABSEJFHVAUCB1 <- -tail(absej$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE JF CUMULATIVE \n")
-    absejc <- ABSE::evalutate_results(populations,
+    absejc <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
