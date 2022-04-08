@@ -5,11 +5,12 @@ import itertools
 
 
 if __name__ == "__main__":
+    PWD = os.getcwd()
     EXP_NAME = os.path.basename(os.getcwd())
     # Make scratch directory
     EXP_DIR = f"/scratch/tmp/rookj/tmp/ABSE/{EXP_NAME}"
     output_dir = f"{EXP_DIR}/validation"
-    os.system(f"rm -rf {output_dir}")
+    #os.system(f"rm -rf {output_dir}")
     os.system(f"mkdir {output_dir}")
 
     visualisations_path = "visualisation"
@@ -30,6 +31,8 @@ if __name__ == "__main__":
             continue
         algorithms.append(a)
 
+    os.system(f"cd {algorithms_path}; ./distribute_shared_files.sh; cd {PWD}")
+
     #Launch validation for all
     for instance, algorithm in itertools.product(instances, algorithms):
         output_name = f"{instance}_{algorithm}"
@@ -40,6 +43,7 @@ if __name__ == "__main__":
         instance_path = os.path.join(instances_path, instance)
         algorithm_path = os.path.join(algorithms_path, algorithm)
 
-        command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {algorithm_path} --runs 10 --budget 50000 --output {output_path} --visualise {visualisation_path}"
+        command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {algorithm_path} --runs 5 --budget 25000 --output {output_path} --visualise {visualisation_path}"
+        # command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {algorithm_path} --runs 1 --budget 20000 --visualise {visualisation_path}"
         print(command)
         os.system(command)

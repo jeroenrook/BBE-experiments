@@ -72,7 +72,7 @@ if __name__ == "__main__":
         #     tdf = data["abse"]["basin_separated_eval"]
         for absetype in ["abse", "absec"]:
             tdf = data[absetype]["basin_separated_eval"].T
-            tdf = tdf.set_axis(['fun_calls', 'value_basin1', 'value_basin2', 'value_basin3', 'value_basin4', 'mean_value', 'auc_hv_mean', 'auc_hv1'],
+            tdf = tdf.set_axis(['fun_calls', 'value_basin1', 'value_basin2', 'value_basin3', 'value_basin4', 'value_basin5', 'mean_value', 'auc_hv_mean', 'auc_hv1'],
                                axis=1,
                                inplace=False)
             tdf["type"] = absetype
@@ -84,4 +84,5 @@ if __name__ == "__main__":
             else:
                 df = pd.concat([df, tdf], ignore_index=True)
     print(df)
-    df.to_csv("abse_tables.csv")
+    if df is not None:
+        df.to_csv("abse_tables.csv")

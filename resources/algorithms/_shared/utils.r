@@ -101,14 +101,14 @@ compute_performance_metrics <- function (populations, fn, opt, last_pop=NULL){
     abse <- ABSE::evalutate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
-                                    basins = 1:40,
+                                    basins = 1:5,
                                     keep_points=FALSE,
                                     join_fronts=FALSE)
     measures$ABSEHVMEAN <- -tail(abse$basin_separated_eval$mean_value, n=1)
     measures$ABSEHVMEANNORM <- measures$ABSEHVMEAN / besthv
-    # measures$ABSEHVAUCMEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
-    # measures$ABSEHVAUCMEANNORM <- measures$ABSEHVAUCMEAN / besthv
-    # measures$ABSEHVAUCB1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
+    measures$ABSEHVAUCMEAN <- -tail(abse$basin_separated_eval$auc_hv_mean, n=1)
+    measures$ABSEHVAUCMEANNORM <- measures$ABSEHVAUCMEAN / besthv
+    measures$ABSEHVAUCB1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE CUMULATIVE \n")
 
@@ -116,7 +116,7 @@ compute_performance_metrics <- function (populations, fn, opt, last_pop=NULL){
     absec <- ABSE::evalutate_results(fnpopulations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
-                                    basins = 1:40,
+                                    basins = 1:5,
                                     keep_points=TRUE,
                                     join_fronts=FALSE,
                                     design=abse,
@@ -126,7 +126,7 @@ compute_performance_metrics <- function (populations, fn, opt, last_pop=NULL){
     measures$ABSECUMHVMEANNORM <- measures$ABSECUMHVMEAN / besthv
     measures$ABSECUMHVAUCMEAN <- -tail(absec$basin_separated_eval$auc_hv_mean, n=1)
     measures$ABSECUMHVAUCMEANNORM <- measures$ABSECUMHVAUCMEAN / besthv
-    # measures$ABSECUMHVAUCB1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
+    measures$ABSECUMHVAUCB1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
 
     # cat("ABSE JF ITERATIVE \n")
     # absej <- ABSE::evalutate_results(populations,
@@ -160,9 +160,8 @@ compute_performance_metrics <- function (populations, fn, opt, last_pop=NULL){
         # plot(t(solution_set), main="Objective space")
         # plot(t(pareto.matrix), main="Non-dominated set in objective space")
         # dev.off()
-        design <- abse
         output <- paste0(opt$visualise,".Rdata")
-        save(abse, absec, absej, absejc, file=output)
+        save(abse, absec, file=output)
     }
 
     return(measures)
