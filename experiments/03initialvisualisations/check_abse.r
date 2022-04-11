@@ -27,7 +27,7 @@ set.seed(42)
 # NB: obj.fn is already a wrapped function!
 obj.fn = parse_instance_file(opt$instance) #utils.R
 
-abse <- ABSE::evalutate_results(populations,
+abse <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -38,7 +38,7 @@ abse <- ABSE::evalutate_results(populations,
     measures$ABSE.HV.AUC.B1 <- -tail(abse$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE CUMULATIVE \n")
-    absec <- ABSE::evalutate_results(populations,
+    absec <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -52,7 +52,7 @@ abse <- ABSE::evalutate_results(populations,
     measures$ABSE.CUM.HV.AUC.B1 <- -tail(absec$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE JF ITERATIVE \n")
-    absej <- ABSE::evalutate_results(populations,
+    absej <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,
@@ -64,7 +64,7 @@ abse <- ABSE::evalutate_results(populations,
     measures$ABSE.JF.HV.AUC.B1 <- -tail(absej$basin_separated_eval$auc_hv1, n=1)
 
     cat("ABSE JF CUMULATIVE \n")
-    absejc <- ABSE::evalutate_results(populations,
+    absejc <- ABSE::evaluate_results(populations,
                                     unwrapped.fn,
                                     ref.point=reference.point,
                                     basins = 1:4,

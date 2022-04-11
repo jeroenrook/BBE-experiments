@@ -87,7 +87,7 @@ compute_performance_metrics <- function (populations, fn, instance_path){
     #TODO: IDEA: Make also a tibble of the smoof logging wrapper and use that to compute the ABSE measures
 
     #TODO Jonathan: basins levels sorted on HV
-    abse <- ABSE::evalutate_results(populations, fn, ref.point=reference.point, basins = 1:5, join_fronts=FALSE)
+    abse <- ABSE::evaluate_results(populations, fn, ref.point=reference.point, basins = 1:5, join_fronts=FALSE)
     measures$ABSE <- abse$basin_separated_eval
     #AUC of trajectory
     #AUC of cummulative population generations#TODO Jonathan:  in ABSE package as option
@@ -96,7 +96,7 @@ compute_performance_metrics <- function (populations, fn, instance_path){
 
     #ABSE Join fronts
     #TODO Jonathan: reuse redundant computation somehow: return object from previous abse call
-    measures$ABSEJF <- NULL#ABSE::evalutate_results(populations, fn, ref.point=reference.point, basins = 1:5, join_fronts=TRUE)
+    measures$ABSEJF <- NULL#ABSE::evaluate_results(populations, fn, ref.point=reference.point, basins = 1:5, join_fronts=TRUE)
 
     return(measures)
 }
