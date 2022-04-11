@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # Make scratch directory
     EXP_DIR = f"/scratch/tmp/rookj/tmp/ABSE/{EXP_NAME}"
 
-    targets = ["default", "HVN", "SP", "ABSEHVMEANNORM", "ABSEHVAUCMEANNORM", "ABSECUMHVMEANNORM", "ABSECUMHVAUCMEANNORM"]
+    targets = ["default", "HVN", "SP", "ABSEHVMEANNORM", "ABSECUMHVMEANNORM", "ABSECUMHVAUCMEANNORM"]
     if args.target is not None:
         target = args.target if args.target in targets else "default"
         targets = [target]
@@ -61,10 +61,10 @@ if __name__ == "__main__":
                 print(f"{solver} - {instance}")
                 solver_path = os.path.join(solver_dir, solver)
                 instance_path = os.path.join(instance_dir, instance)
-                output_name = f"{target}_{solver}_{instance}.pickle"
+                output_name = f"{target}_{solver}_{instance}"
                 output_path = os.path.join(output_dir, output_name+".pickle")
 
                 visualisation_path = os.path.join("visualisation", output_name)
-                command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {solver_path} --runs 5 --budget 20000 --output {output_path} --visualise {visualisation_path} {configarg}"
+                command = f"sbatch ../02validation/validation.py --instance {instance_path} --solver {solver_path} --runs 25 --budget 25000 --output {output_path} --visualise {visualisation_path} {configarg}"
                 print(command)
                 os.system(command)
