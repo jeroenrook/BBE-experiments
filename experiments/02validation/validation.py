@@ -40,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument('--configuration', default=None)
     parser.add_argument("--visualise", default=None)
     parser.add_argument("--output", default=None)
+    parser.add_argument("--partition", default=None, type=int)
     args = parser.parse_args()
     np.random.seed(0)
     seeds = np.random.randint(1, 2**16 -1, 1000)
@@ -56,6 +57,8 @@ if __name__ == "__main__":
     performances = np.zeros(args.runs)
     table = []
     for i in range(args.runs):
+        if args.partition is not None:
+            i += args.runs * args.partition
         seed = seeds[i]
         row = {"run": i,
                "seed": seed}

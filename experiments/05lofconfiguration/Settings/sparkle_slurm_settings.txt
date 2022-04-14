@@ -1,3 +1,2 @@
 --partition=normal
 --mem-per-cpu=4000
---time-min=540

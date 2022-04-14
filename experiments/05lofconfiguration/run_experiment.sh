@@ -53,6 +53,7 @@ for target in "${targets[@]}"; do
 
 done
 
-sbatch joblauncher.py
+JOBID=$(sbatch -p joblauncher.py)
+sbatch --dependecy=afterany:"$JOBID" do_validation.py
 
 
